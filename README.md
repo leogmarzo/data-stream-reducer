@@ -1,1 +1,1 @@
-# logs-reduction
+# Data Stream Reducer
