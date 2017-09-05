@@ -41,8 +41,8 @@ public class SparkStreamingKafkaLogAnalyzer {
 		// Create a Spark Context.
 		SparkConf conf = new SparkConf()
 			.setAppName(appName)
-			.setMaster("local[*]")
-			.set("spark.executor.memory", "1g");
+			.setMaster("spark://master:7077")
+			.set("spark.executor.memory", "2g");
 		JavaSparkContext sc = new JavaSparkContext(conf);
 
 		// This sets the update window to be every 10 seconds.
@@ -64,16 +64,18 @@ public class SparkStreamingKafkaLogAnalyzer {
 
         LOGGER.info("Received DStream connecting to zookeeper " + zkQuorum + " group " + group + " topics" +
         		topicMap);
-        LOGGER.info("logDataDStream: "+ logDataDStream);
+        LOGGER.info("logDataDStream " + logDataDStream.count());
+		logDataDStream.print();
 
-        JavaDStream<ApacheAccessLog> accessLogDStream = logDataDStream.map(
+
+		JavaDStream<ApacheAccessLog> accessLogDStream = logDataDStream.map(
                 new Function<Tuple2<String, String>, ApacheAccessLog>() {
                     public ApacheAccessLog call(Tuple2<String, String> message) {
                         String strLogMsg = message._2();
 						try {
 							return ApacheAccessLog.parseFromLogLine(strLogMsg);
 						} catch (IOException e) {
-							e.printStackTrace();
+							LOGGER.error("Error when something", e);
 						}
 						return null;
 					}
@@ -84,14 +86,15 @@ public class SparkStreamingKafkaLogAnalyzer {
         JavaDStream<ApacheAccessLog> windowDStream = accessLogDStream.window(
 				WINDOW_LENGTH, SLIDE_INTERVAL);
 
-		System.out.println("PRINT");
+		accessLogDStream.print();
 		windowDStream.print();
 		// Start the streaming server.
+
 		jssc.start(); // Start the computation
 		try {
 			jssc.awaitTermination(); // Wait for the computation to terminate
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			LOGGER.error("error on termination", e);
 		}
 	}
 }

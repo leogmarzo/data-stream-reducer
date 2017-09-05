@@ -80,6 +80,8 @@ public final class JavaKafkaWordCount {
         JavaPairDStream<String, Integer> wordCounts = words.mapToPair(s -> new Tuple2<>(s, 1))
                 .reduceByKey((i1, i2) -> i1 + i2);
 
+        words.print();
+        lines.print();
         wordCounts.print();
         jssc.start();
         jssc.awaitTermination();
