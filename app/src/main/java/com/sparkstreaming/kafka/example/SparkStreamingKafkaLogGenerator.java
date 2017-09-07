@@ -3,6 +3,9 @@
  */
 package com.sparkstreaming.kafka.example;
 
+import java.io.FileInputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -66,9 +69,9 @@ public class SparkStreamingKafkaLogGenerator {
 
 		Random r = new Random();
 		int low = 1;
-		int high = 8;
+		int high = 10;
 
-		for (int i=1; i<=iterations; i++) {
+		for (int i=1; i <= iterations; i++) {
 			// Add delay per the run-time argument millisToSleep
 			try {
 				Thread.sleep(millisToSleep);
@@ -83,23 +86,68 @@ public class SparkStreamingKafkaLogGenerator {
 			
 			// Decide which message to post based on the random number generated
 			// to simulate continuous flow of log messages.
-			if (rndNum == 1 || rndNum == 8) {
-				LOGGER.info("Posting message msg1: " + msg1);
-				KeyedMessage data = new KeyedMessage(topic, String.valueOf(i), msg1);
-				producer.send(data);
-			} else if (rndNum == 2 || rndNum == 7) {
-				LOGGER.info("Posting message msg2: " + msg2);
-				KeyedMessage data = new KeyedMessage(topic, String.valueOf(i), msg2);
-				producer.send(data);
-			} else if (rndNum == 3 || rndNum == 6) {
-				LOGGER.info("Posting message msg3: " + msg3);
-				KeyedMessage data = new KeyedMessage(topic, String.valueOf(i), msg3);
-				producer.send(data);
-			} else if (rndNum == 4 || rndNum == 5) {
-				LOGGER.info("Posting message msg4: " + msg4);
-				KeyedMessage data = new KeyedMessage(topic, String.valueOf(i), msg4);
-				producer.send(data);
-			}
+			if (rndNum == 1 || rndNum == 10) {
+				try {
+					int test = 1 / 0;
+				} catch (Exception e){
+					StringWriter sw = new StringWriter();
+					PrintWriter pw = new PrintWriter(sw);
+					e.printStackTrace(pw);
+					String sStackTrace = sw.toString();
+					LOGGER.info("Exception 1: " + sStackTrace);
+					KeyedMessage data = new KeyedMessage(topic, String.valueOf(i), sStackTrace);
+					producer.send(data);
+				}
+			} else if (rndNum == 2 || rndNum == 9) {
+				try {
+					String data = null;
+					data.toString();
+				} catch (Exception e){
+					StringWriter sw = new StringWriter();
+					PrintWriter pw = new PrintWriter(sw);
+					e.printStackTrace(pw);
+					String sStackTrace = sw.toString();
+					LOGGER.info("Exception 2: " + sStackTrace);
+					KeyedMessage data = new KeyedMessage(topic, String.valueOf(i), sStackTrace);
+					producer.send(data);
+				}
+			} else if (rndNum == 3 || rndNum == 8) {
+				try {
+					FileInputStream fis = new FileInputStream("B:/myfile.txt");
+				} catch (Exception e){
+					StringWriter sw = new StringWriter();
+					PrintWriter pw = new PrintWriter(sw);
+					e.printStackTrace(pw);
+					String sStackTrace = sw.toString();
+					LOGGER.info("Exception 3: " + sStackTrace);
+					KeyedMessage data = new KeyedMessage(topic, String.valueOf(i), sStackTrace);
+					producer.send(data);
+				}
+			} else if (rndNum == 4 || rndNum == 7) {
+				try {
+					int arr[] = {1,2,3,4,5};
+					System.out.println(arr[7]);
+				} catch (Exception e){
+					StringWriter sw = new StringWriter();
+					PrintWriter pw = new PrintWriter(sw);
+					e.printStackTrace(pw);
+					String sStackTrace = sw.toString();
+					LOGGER.info("Exception 4: " + sStackTrace);
+					KeyedMessage data = new KeyedMessage(topic, String.valueOf(i), sStackTrace);
+					producer.send(data);
+				}
+			} else if (rndNum == 5 || rndNum == 6) {
+				try {
+					throw new RuntimeException("Custom Exception");
+				} catch (Exception e){
+					StringWriter sw = new StringWriter();
+					PrintWriter pw = new PrintWriter(sw);
+					e.printStackTrace(pw);
+					String sStackTrace = sw.toString();
+					LOGGER.info("Exception 5: " + sStackTrace);
+					KeyedMessage data = new KeyedMessage(topic, String.valueOf(i), sStackTrace);
+					producer.send(data);
+				}
 		}
 		producer.close();
 	}
