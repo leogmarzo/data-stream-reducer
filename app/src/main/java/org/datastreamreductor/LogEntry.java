@@ -7,15 +7,25 @@ import java.io.Serializable;
  */
 public class LogEntry implements Serializable{
 
-    private String hash;
+    private int hash;
     private String message;
 
-    public LogEntry(String message) {
+    public LogEntry(int hash, String message) {
         this.message = message;
+        this.hash = hash;
     }
 
     @Override
     public String toString() {
         return message;
     }
+
+    public int getHash() {
+        return hash;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
 }

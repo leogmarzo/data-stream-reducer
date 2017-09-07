@@ -7,13 +7,19 @@ import com.databricks.apps.logs.ApacheAccessLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.VoidFunction;
+import org.apache.spark.api.java.function.VoidFunction2;
 import org.apache.spark.streaming.Duration;
+import org.apache.spark.streaming.Time;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaPairReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.apache.spark.streaming.kafka.KafkaUtils;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 import scala.Tuple2;
 
 import java.io.IOException;
@@ -32,7 +38,6 @@ public class StreamDataReductor {
 
 	public static void main(String[] args) {
 
-		String outputFolder = args[0];
 		// Set application name
 		String appName = "Spark Streaming Kafka Sample";
 
@@ -68,18 +73,36 @@ public class StreamDataReductor {
                 new Function<Tuple2<String, String>, LogEntry>() {
                     public LogEntry call(Tuple2<String, String> message) {
                         String strLogMsg = message._2();
-						return new LogEntry(strLogMsg);
+						int hash = strLogMsg.hashCode();
+						LOGGER.info("HASHCODE: " + hash + " MENSAJE: " + strLogMsg);
+						return new LogEntry(hash, strLogMsg);
 					}
                 }
-            );  
-        logDStream.print();
+            );
 
-		logDStream.dstream().saveAsTextFiles("file:///tmp/data/output-spark/" + outputFolder, "log");
+		//store in redis
+		logDStream.foreachRDD(
+				new VoidFunction2<JavaRDD<LogEntry>, Time>() {
+					@Override
+					public void call(JavaRDD<LogEntry> logEntryJavaRDD, Time time) throws Exception {
+						logEntryJavaRDD.foreach(
+								new VoidFunction<LogEntry>() {
+									@Override
+									public void call(LogEntry logEntry) throws Exception {
+										pushToRedis(logEntry);
+									}
+								}
+						);
+					}
+				}
+		);
+        //logDStream.print();
 
+		//logDStream.dstream().saveAsTextFiles("file:///tmp/data/output-spark/" + outputFolder, "log");
 
-		JavaDStream<LogEntry> windowDStream = logDStream.window(WINDOW_LENGTH, SLIDE_INTERVAL);
+		//JavaDStream<LogEntry> windowDStream = logDStream.window(WINDOW_LENGTH, SLIDE_INTERVAL);
 
-		windowDStream.print();
+		//windowDStream.print();
 		// Start the streaming server.
 
 		jssc.start(); // Start the computation
@@ -88,6 +111,16 @@ public class StreamDataReductor {
 		} catch (InterruptedException e) {
 			LOGGER.error("error on termination", e);
 		}
+	}
+
+	private static void pushToRedis(LogEntry logEntry) {
+		JedisPool jedisPool = new JedisPool("192.168.99.100", 6379);
+		Jedis jedis = jedisPool.getResource();
+		LOGGER.info("Guardando log " + logEntry.getMessage());
+		jedis.set("log: " + logEntry.getHash(), logEntry.getMessage());
+		//System.out.println(jedis.keys("*keys*").size());
+		jedis.close();
+		jedisPool.close();
 	}
 }
 
