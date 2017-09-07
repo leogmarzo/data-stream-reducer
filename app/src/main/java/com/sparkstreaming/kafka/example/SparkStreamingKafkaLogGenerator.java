@@ -21,7 +21,7 @@ import kafka.producer.ProducerConfig;
  * 
  */
 public class SparkStreamingKafkaLogGenerator {
-	
+
 	private static final Logger LOGGER = Logger.getLogger("logGenerator");
 
 	public static void main(String[] args) {
@@ -32,7 +32,7 @@ public class SparkStreamingKafkaLogGenerator {
 		//
 		// Get log generator run time arguments. 
 		//
-        String group = args[0];
+		String group = args[0];
 		String topic = args[1];
 		int iterations = new Integer(args[2]).intValue();
 		long millisToSleep = new Long(args[3]).longValue();
@@ -50,17 +50,17 @@ public class SparkStreamingKafkaLogGenerator {
 
 		Producer producer = new Producer(config);
 
-        // Get current system time
-        DateFormat df = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss Z");
+		// Get current system time
+		DateFormat df = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss Z");
 		Date currDate = new Date();
 		String strDate = df.format(currDate);
 		LOGGER.info("strDate: " + strDate);
 
-        String ipAddr = "192.168.99.100";
-        String clientId = "test-client";
-        String userId = "test-user";
+		String ipAddr = "192.168.99.100";
+		String clientId = "test-client";
+		String userId = "test-user";
 
-        String msgPrefix = ipAddr + " " + clientId + " " + userId + " " + "[" + strDate + "]";
+		String msgPrefix = ipAddr + " " + clientId + " " + userId + " " + "[" + strDate + "]";
 
 		String msg1 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/SparkStreamingKafkaLogGenerator.java HTTP/1.1\" 200 1234";
 		String msg2 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/SparkStreamingKafkaLogAnalyzer.java HTTP/1.1\" 200 2000";
@@ -71,7 +71,7 @@ public class SparkStreamingKafkaLogGenerator {
 		int low = 1;
 		int high = 10;
 
-		for (int i=1; i <= iterations; i++) {
+		for (int i = 1; i <= iterations; i++) {
 			// Add delay per the run-time argument millisToSleep
 			try {
 				Thread.sleep(millisToSleep);
@@ -80,16 +80,16 @@ public class SparkStreamingKafkaLogGenerator {
 				e.printStackTrace();
 			}
 			LOGGER.info("**** ITERATION#: " + i);
-			
+
 			// Generate a random number.º
-			int rndNum = r.nextInt(high-low) + low;
-			
+			int rndNum = r.nextInt(high - low) + low;
+
 			// Decide which message to post based on the random number generated
 			// to simulate continuous flow of log messages.
 			if (rndNum == 1 || rndNum == 10) {
 				try {
 					int test = 1 / 0;
-				} catch (Exception e){
+				} catch (Exception e) {
 					StringWriter sw = new StringWriter();
 					PrintWriter pw = new PrintWriter(sw);
 					e.printStackTrace(pw);
@@ -102,7 +102,7 @@ public class SparkStreamingKafkaLogGenerator {
 				try {
 					String data = null;
 					data.toString();
-				} catch (Exception e){
+				} catch (Exception e) {
 					StringWriter sw = new StringWriter();
 					PrintWriter pw = new PrintWriter(sw);
 					e.printStackTrace(pw);
@@ -114,7 +114,7 @@ public class SparkStreamingKafkaLogGenerator {
 			} else if (rndNum == 3 || rndNum == 8) {
 				try {
 					FileInputStream fis = new FileInputStream("B:/myfile.txt");
-				} catch (Exception e){
+				} catch (Exception e) {
 					StringWriter sw = new StringWriter();
 					PrintWriter pw = new PrintWriter(sw);
 					e.printStackTrace(pw);
@@ -125,9 +125,9 @@ public class SparkStreamingKafkaLogGenerator {
 				}
 			} else if (rndNum == 4 || rndNum == 7) {
 				try {
-					int arr[] = {1,2,3,4,5};
+					int arr[] = {1, 2, 3, 4, 5};
 					System.out.println(arr[7]);
-				} catch (Exception e){
+				} catch (Exception e) {
 					StringWriter sw = new StringWriter();
 					PrintWriter pw = new PrintWriter(sw);
 					e.printStackTrace(pw);
@@ -139,7 +139,7 @@ public class SparkStreamingKafkaLogGenerator {
 			} else if (rndNum == 5 || rndNum == 6) {
 				try {
 					throw new RuntimeException("Custom Exception");
-				} catch (Exception e){
+				} catch (Exception e) {
 					StringWriter sw = new StringWriter();
 					PrintWriter pw = new PrintWriter(sw);
 					e.printStackTrace(pw);
@@ -148,8 +148,9 @@ public class SparkStreamingKafkaLogGenerator {
 					KeyedMessage data = new KeyedMessage(topic, String.valueOf(i), sStackTrace);
 					producer.send(data);
 				}
+			}
+			producer.close();
 		}
-		producer.close();
 	}
 }
 

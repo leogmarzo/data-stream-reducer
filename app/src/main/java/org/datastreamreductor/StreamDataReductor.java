@@ -31,6 +31,8 @@ public class StreamDataReductor {
 	private static final Duration SLIDE_INTERVAL = new Duration(10 * 1000);
 
 	public static void main(String[] args) {
+
+		String outputFolder = args[0];
 		// Set application name
 		String appName = "Spark Streaming Kafka Sample";
 
@@ -72,7 +74,7 @@ public class StreamDataReductor {
             );  
         logDStream.print();
 
-		logDStream.dstream().saveAsTextFiles("file:///tmp/data/output-spark/output", "txt");
+		logDStream.dstream().saveAsTextFiles("file:///tmp/data/output-spark/" + outputFolder, "log");
 
 
 		JavaDStream<LogEntry> windowDStream = logDStream.window(WINDOW_LENGTH, SLIDE_INTERVAL);
