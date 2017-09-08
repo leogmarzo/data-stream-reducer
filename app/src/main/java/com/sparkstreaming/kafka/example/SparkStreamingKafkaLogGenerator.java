@@ -50,21 +50,18 @@ public class SparkStreamingKafkaLogGenerator {
 		Producer producer = new Producer(config);
 
 		// Get current system time
-		DateFormat df = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss Z");
-		Date currDate = new Date();
-		String strDate = df.format(currDate);
-		LOGGER.info("strDate: " + strDate);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyy-MM-dd hh:mm:ss,SSS");
 
 		String ipAddr = "192.168.99.100";
 		String clientId = "test-client";
 		String userId = "test-user";
 
-		String msgPrefix = ipAddr + " " + clientId + " " + userId + " " + "[" + strDate + "]";
+	//	String msgPrefix = ipAddr + " " + clientId + " " + userId + " " + "[" + strDate + "]";
 
-		String msg1 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/SparkStreamingKafkaLogGenerator.java HTTP/1.1\" 200 1234";
-		String msg2 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/SparkStreamingKafkaLogAnalyzer.java HTTP/1.1\" 200 2000";
-		String msg3 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/Error.java HTTP/1.1\" 404 2500";
-		String msg4 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/DatabaseError.java HTTP/1.1\" 401 100";
+		//String msg1 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/SparkStreamingKafkaLogGenerator.java HTTP/1.1\" 200 1234";
+		//String msg2 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/SparkStreamingKafkaLogAnalyzer.java HTTP/1.1\" 200 2000";
+		//String msg3 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/Error.java HTTP/1.1\" 404 2500";
+		//String msg4 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/DatabaseError.java HTTP/1.1\" 401 100";
 
 		Random r = new Random();
 		int low = 1;
@@ -78,8 +75,6 @@ public class SparkStreamingKafkaLogGenerator {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			LOGGER.info("**** ITERATION#: " + i);
-
 			// Generate a random number.º
 			int rndNum = r.nextInt(high - low) + low;
 
@@ -89,52 +84,47 @@ public class SparkStreamingKafkaLogGenerator {
 				try {
 					int test = 1 / 0;
 				} catch (Exception e) {
-					String st = ExceptionUtils.getStackTrace(e);
-					LOGGER.info(st);
-					KeyedMessage data = new KeyedMessage(topic, String.valueOf(i), st);
-					producer.send(data);
+					//[2017-09-08 09:30:39,835] ERROR
+					formatAndSendLogs(topic, producer, sdf, i, e);
 				}
 			} else if (rndNum == 2 || rndNum == 9) {
 				try {
 					String data = null;
 					data.toString();
 				} catch (Exception e) {
-					String st = ExceptionUtils.getStackTrace(e);
-					LOGGER.info(st);
-					KeyedMessage data = new KeyedMessage(topic, String.valueOf(i), st);
-					producer.send(data);
+					formatAndSendLogs(topic, producer, sdf, i, e);
 				}
 			} else if (rndNum == 3 || rndNum == 8) {
 				try {
 					FileInputStream fis = new FileInputStream("B:/myfile.txt");
 				} catch (Exception e) {
-					String st = ExceptionUtils.getStackTrace(e);
-					LOGGER.info(st);
-					KeyedMessage data = new KeyedMessage(topic, String.valueOf(i), st);
-					producer.send(data);
+					formatAndSendLogs(topic, producer, sdf, i, e);
 				}
 			} else if (rndNum == 4 || rndNum == 7) {
 				try {
 					int arr[] = {1, 2, 3, 4, 5};
 					System.out.println(arr[7]);
 				} catch (Exception e) {
-					String st = ExceptionUtils.getStackTrace(e);
-					LOGGER.info(st);
-					KeyedMessage data = new KeyedMessage(topic, String.valueOf(i), st);
-					producer.send(data);
+					formatAndSendLogs(topic, producer, sdf, i, e);
 				}
 			} else if (rndNum == 5 || rndNum == 6) {
 				try {
 					throw new RuntimeException("Custom Exception");
 				} catch (Exception e) {
-					String st = ExceptionUtils.getStackTrace(e);
-					LOGGER.info(st);
-					KeyedMessage data = new KeyedMessage(topic, String.valueOf(i), st);
-					producer.send(data);
+					formatAndSendLogs(topic, producer, sdf, i, e);
 				}
 			}
 		}
 		producer.close();
+	}
+
+	private void formatAndSendLogs(String topic, Producer producer, SimpleDateFormat sdf, int i, Exception e) {
+		String st = ExceptionUtils.getStackTrace(e);
+		String preLog = "[" + sdf.format(new Date()) + "] ERROR";
+		String logEvent = preLog + " " + st;
+		System.out.println(logEvent);
+		KeyedMessage data = new KeyedMessage(topic, String.valueOf(i), logEvent);
+		producer.send(data);
 	}
 }
 

@@ -8,24 +8,35 @@ import java.io.Serializable;
 public class LogEntry implements Serializable{
 
     private int hash;
-    private String message;
+    private String stackTrace;
+    private String date;
 
-    public LogEntry(int hash, String message) {
-        this.message = message;
+    public LogEntry(int hash, String date, String stackTrace) {
+        this.stackTrace = stackTrace;
         this.hash = hash;
+        this.date = date;
     }
 
     @Override
     public String toString() {
-        return message;
+        return "hash " + hash + "\n " +
+                "date " + date + "\n " +
+                "stack trace " + stackTrace;
     }
 
     public int getHash() {
         return hash;
     }
 
-    public String getMessage() {
-        return message;
+    public String getStackTrace() {
+        return stackTrace;
     }
 
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
 }
