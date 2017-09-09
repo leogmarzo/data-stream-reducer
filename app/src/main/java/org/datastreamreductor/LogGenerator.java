@@ -27,9 +27,7 @@ public class LogGenerator {
 			System.err.println("Invalid arguments passed. Usage: LogGenerator spark-streaming-sample-groupid spark-streaming-sample-topic 50 1000");
 			System.exit(-1);
 		}
-		//
-		// Get log generator run time arguments. 
-		//
+
 		String group = args[0];
 		String topic = args[1];
 		int iterations = new Integer(args[2]).intValue();
@@ -54,13 +52,6 @@ public class LogGenerator {
 		String ipAddr = "192.168.99.100";
 		String clientId = "test-client";
 		String userId = "test-user";
-
-	//	String msgPrefix = ipAddr + " " + clientId + " " + userId + " " + "[" + strDate + "]";
-
-		//String msg1 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/LogGenerator.java HTTP/1.1\" 200 1234";
-		//String msg2 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/SparkStreamingKafkaLogAnalyzer.java HTTP/1.1\" 200 2000";
-		//String msg3 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/Error.java HTTP/1.1\" 404 2500";
-		//String msg4 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/DatabaseError.java HTTP/1.1\" 401 100";
 
 		Random r = new Random();
 		int low = 1;
