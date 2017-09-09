@@ -4,8 +4,6 @@
 package com.sparkstreaming.kafka.example;
 
 import java.io.FileInputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -15,13 +13,14 @@ import java.util.logging.Logger;
 import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
+import org.apache.commons.lang.exception.ExceptionUtils;
 
 /**
  * @author
  * 
  */
 public class SparkStreamingKafkaLogGenerator {
-	
+
 	private static final Logger LOGGER = Logger.getLogger("logGenerator");
 
 	public static void main(String[] args) {
@@ -32,7 +31,7 @@ public class SparkStreamingKafkaLogGenerator {
 		//
 		// Get log generator run time arguments. 
 		//
-        String group = args[0];
+		String group = args[0];
 		String topic = args[1];
 		int iterations = new Integer(args[2]).intValue();
 		long millisToSleep = new Long(args[3]).longValue();
@@ -50,28 +49,25 @@ public class SparkStreamingKafkaLogGenerator {
 
 		Producer producer = new Producer(config);
 
-        // Get current system time
-        DateFormat df = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss Z");
-		Date currDate = new Date();
-		String strDate = df.format(currDate);
-		LOGGER.info("strDate: " + strDate);
+		// Get current system time
+		SimpleDateFormat sdf = new SimpleDateFormat("yyy-MM-dd hh:mm:ss,SSS");
 
-        String ipAddr = "192.168.99.100";
-        String clientId = "test-client";
-        String userId = "test-user";
+		String ipAddr = "192.168.99.100";
+		String clientId = "test-client";
+		String userId = "test-user";
 
-        String msgPrefix = ipAddr + " " + clientId + " " + userId + " " + "[" + strDate + "]";
+	//	String msgPrefix = ipAddr + " " + clientId + " " + userId + " " + "[" + strDate + "]";
 
-		String msg1 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/SparkStreamingKafkaLogGenerator.java HTTP/1.1\" 200 1234";
-		String msg2 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/SparkStreamingKafkaLogAnalyzer.java HTTP/1.1\" 200 2000";
-		String msg3 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/Error.java HTTP/1.1\" 404 2500";
-		String msg4 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/DatabaseError.java HTTP/1.1\" 401 100";
+		//String msg1 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/SparkStreamingKafkaLogGenerator.java HTTP/1.1\" 200 1234";
+		//String msg2 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/SparkStreamingKafkaLogAnalyzer.java HTTP/1.1\" 200 2000";
+		//String msg3 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/Error.java HTTP/1.1\" 404 2500";
+		//String msg4 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/DatabaseError.java HTTP/1.1\" 401 100";
 
 		Random r = new Random();
 		int low = 1;
 		int high = 10;
 
-		for (int i=1; i <= iterations; i++) {
+		for (int i = 1; i <= iterations; i++) {
 			// Add delay per the run-time argument millisToSleep
 			try {
 				Thread.sleep(millisToSleep);
@@ -79,77 +75,56 @@ public class SparkStreamingKafkaLogGenerator {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			LOGGER.info("**** ITERATION#: " + i);
-			
 			// Generate a random number.º
-			int rndNum = r.nextInt(high-low) + low;
-			
+			int rndNum = r.nextInt(high - low) + low;
+
 			// Decide which message to post based on the random number generated
 			// to simulate continuous flow of log messages.
 			if (rndNum == 1 || rndNum == 10) {
 				try {
 					int test = 1 / 0;
-				} catch (Exception e){
-					StringWriter sw = new StringWriter();
-					PrintWriter pw = new PrintWriter(sw);
-					e.printStackTrace(pw);
-					String sStackTrace = sw.toString();
-					LOGGER.info("Exception 1: " + sStackTrace);
-					KeyedMessage data = new KeyedMessage(topic, String.valueOf(i), sStackTrace);
-					producer.send(data);
+				} catch (Exception e) {
+					//[2017-09-08 09:30:39,835] ERROR
+					formatAndSendLogs(topic, producer, sdf, i, e);
 				}
 			} else if (rndNum == 2 || rndNum == 9) {
 				try {
 					String data = null;
 					data.toString();
-				} catch (Exception e){
-					StringWriter sw = new StringWriter();
-					PrintWriter pw = new PrintWriter(sw);
-					e.printStackTrace(pw);
-					String sStackTrace = sw.toString();
-					LOGGER.info("Exception 2: " + sStackTrace);
-					KeyedMessage data = new KeyedMessage(topic, String.valueOf(i), sStackTrace);
-					producer.send(data);
+				} catch (Exception e) {
+					formatAndSendLogs(topic, producer, sdf, i, e);
 				}
 			} else if (rndNum == 3 || rndNum == 8) {
 				try {
 					FileInputStream fis = new FileInputStream("B:/myfile.txt");
-				} catch (Exception e){
-					StringWriter sw = new StringWriter();
-					PrintWriter pw = new PrintWriter(sw);
-					e.printStackTrace(pw);
-					String sStackTrace = sw.toString();
-					LOGGER.info("Exception 3: " + sStackTrace);
-					KeyedMessage data = new KeyedMessage(topic, String.valueOf(i), sStackTrace);
-					producer.send(data);
+				} catch (Exception e) {
+					formatAndSendLogs(topic, producer, sdf, i, e);
 				}
 			} else if (rndNum == 4 || rndNum == 7) {
 				try {
-					int arr[] = {1,2,3,4,5};
+					int arr[] = {1, 2, 3, 4, 5};
 					System.out.println(arr[7]);
-				} catch (Exception e){
-					StringWriter sw = new StringWriter();
-					PrintWriter pw = new PrintWriter(sw);
-					e.printStackTrace(pw);
-					String sStackTrace = sw.toString();
-					LOGGER.info("Exception 4: " + sStackTrace);
-					KeyedMessage data = new KeyedMessage(topic, String.valueOf(i), sStackTrace);
-					producer.send(data);
+				} catch (Exception e) {
+					formatAndSendLogs(topic, producer, sdf, i, e);
 				}
 			} else if (rndNum == 5 || rndNum == 6) {
 				try {
 					throw new RuntimeException("Custom Exception");
-				} catch (Exception e){
-					StringWriter sw = new StringWriter();
-					PrintWriter pw = new PrintWriter(sw);
-					e.printStackTrace(pw);
-					String sStackTrace = sw.toString();
-					LOGGER.info("Exception 5: " + sStackTrace);
-					KeyedMessage data = new KeyedMessage(topic, String.valueOf(i), sStackTrace);
-					producer.send(data);
+				} catch (Exception e) {
+					formatAndSendLogs(topic, producer, sdf, i, e);
 				}
+			}
 		}
 		producer.close();
+	}
+
+	private void formatAndSendLogs(String topic, Producer producer, SimpleDateFormat sdf, int i, Exception e) {
+		String st = ExceptionUtils.getStackTrace(e);
+		String preLog = "[" + sdf.format(new Date()) + "] ERROR";
+		String logEvent = preLog + " " + st;
+		System.out.println(logEvent);
+		KeyedMessage data = new KeyedMessage(topic, String.valueOf(i), logEvent);
+		producer.send(data);
 	}
 }
 
