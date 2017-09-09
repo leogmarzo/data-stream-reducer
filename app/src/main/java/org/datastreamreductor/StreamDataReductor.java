@@ -3,7 +3,6 @@
  */
 package org.datastreamreductor;
 
-import com.databricks.apps.logs.ApacheAccessLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.spark.SparkConf;
@@ -18,12 +17,10 @@ import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaPairReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.apache.spark.streaming.kafka.KafkaUtils;
-import org.apache.spark.streaming.scheduler.*;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import scala.Tuple2;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +42,7 @@ public class StreamDataReductor implements Serializable{
 		public void run() {
 
 		// Set application name
-		String appName = "Spark Streaming Kafka Sample";
+		String appName = "Stream Data Reductor";
 
 		// Create a Spark Context.
 		SparkConf conf = new SparkConf()
@@ -106,16 +103,9 @@ public class StreamDataReductor implements Serializable{
 					}
 				}
 		);
-		logDStream.print();
-
-		//logDStream.dstream().saveAsTextFiles("file:///tmp/data/output-spark/" + outputFolder, "log");
-
-		//JavaDStream<LogEntry> windowDStream = logDStream.window(WINDOW_LENGTH, SLIDE_INTERVAL);
-
-		//windowDStream.print();
-		// Start the streaming server.
 
 		jssc.start(); // Start the computation
+
 		try {
 			jssc.awaitTermination(); // Wait for the computation to terminate
 		} catch (InterruptedException e) {
@@ -130,7 +120,6 @@ public class StreamDataReductor implements Serializable{
 		jedis.set("log:" + logEntry.getDate(), logEntry.getHash()+"");
 		jedis.set("hashes:" + logEntry.getHash(), logEntry.getStackTrace());
 
-		//System.out.println(jedis.keys("*keys*").size());
 		jedis.close();
 		jedisPool.close();
 	}

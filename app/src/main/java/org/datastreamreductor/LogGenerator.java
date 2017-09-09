@@ -1,10 +1,9 @@
 /**
  *  Spark Streaming Kafka Log Generator.
  */
-package com.sparkstreaming.kafka.example;
+package org.datastreamreductor;
 
 import java.io.FileInputStream;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
@@ -19,13 +18,13 @@ import org.apache.commons.lang.exception.ExceptionUtils;
  * @author
  * 
  */
-public class SparkStreamingKafkaLogGenerator {
+public class LogGenerator {
 
 	private static final Logger LOGGER = Logger.getLogger("logGenerator");
 
 	public static void main(String[] args) {
 		if (args.length == 0) {
-			System.err.println("Invalid arguments passed. Usage: SparkStreamingKafkaLogGenerator spark-streaming-sample-groupid spark-streaming-sample-topic 50 1000");
+			System.err.println("Invalid arguments passed. Usage: LogGenerator spark-streaming-sample-groupid spark-streaming-sample-topic 50 1000");
 			System.exit(-1);
 		}
 		//
@@ -35,7 +34,7 @@ public class SparkStreamingKafkaLogGenerator {
 		String topic = args[1];
 		int iterations = new Integer(args[2]).intValue();
 		long millisToSleep = new Long(args[3]).longValue();
-		SparkStreamingKafkaLogGenerator logGenerator = new SparkStreamingKafkaLogGenerator();
+		LogGenerator logGenerator = new LogGenerator();
 		logGenerator.generateLogMessages(group, topic, iterations, millisToSleep);
 	}
 
@@ -58,7 +57,7 @@ public class SparkStreamingKafkaLogGenerator {
 
 	//	String msgPrefix = ipAddr + " " + clientId + " " + userId + " " + "[" + strDate + "]";
 
-		//String msg1 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/SparkStreamingKafkaLogGenerator.java HTTP/1.1\" 200 1234";
+		//String msg1 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/LogGenerator.java HTTP/1.1\" 200 1234";
 		//String msg2 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/SparkStreamingKafkaLogAnalyzer.java HTTP/1.1\" 200 2000";
 		//String msg3 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/Error.java HTTP/1.1\" 404 2500";
 		//String msg4 = msgPrefix + " \"GET /src/main/java/com/sparkstreaming/kafka/example/DatabaseError.java HTTP/1.1\" 401 100";
