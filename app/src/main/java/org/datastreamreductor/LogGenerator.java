@@ -4,10 +4,9 @@
 package org.datastreamreductor;
 
 import java.io.FileInputStream;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Properties;
-import java.util.Random;
+import java.util.*;
 import java.util.logging.Logger;
 import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
@@ -57,12 +56,17 @@ public class LogGenerator {
 		int low = 1;
 		int high = 10;
 
+		List<String> list = new ArrayList<String>();
+		list.add("string A");
+		list.add("string B");
+		list.add("string C");
+		list.add(null);
+
 		for (int i = 1; i <= iterations; i++) {
 			// Add delay per the run-time argument millisToSleep
 			try {
 				Thread.sleep(millisToSleep);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			// Generate a random number.º
@@ -72,15 +76,18 @@ public class LogGenerator {
 			// to simulate continuous flow of log messages.
 			if (rndNum == 1 || rndNum == 10) {
 				try {
-					int test = 1 / 0;
+					list.stream().map(t -> Integer.parseInt(t)).count();
 				} catch (Exception e) {
 					//[2017-09-08 09:30:39,835] ERROR
 					formatAndSendLogs(topic, producer, sdf, i, e);
 				}
 			} else if (rndNum == 2 || rndNum == 9) {
 				try {
-					String data = null;
-					data.toString();
+					String data = "not_number";
+					list.stream().distinct().filter(t -> 1 == 1)
+							.findFirst().filter(t -> 123 == 123)
+							.filter(s -> s.toString().compareToIgnoreCase(s.toString())==0)
+							.map(t -> Integer.parseInt(data));
 				} catch (Exception e) {
 					formatAndSendLogs(topic, producer, sdf, i, e);
 				}
@@ -93,19 +100,41 @@ public class LogGenerator {
 			} else if (rndNum == 4 || rndNum == 7) {
 				try {
 					int arr[] = {1, 2, 3, 4, 5};
-					System.out.println(arr[7]);
+					Arrays.asList(arr).stream().findFirst().equals(Integer.parseInt("a"));
 				} catch (Exception e) {
 					formatAndSendLogs(topic, producer, sdf, i, e);
 				}
 			} else if (rndNum == 5 || rndNum == 6) {
 				try {
-					throw new RuntimeException("Custom Exception");
+					method1();
+
 				} catch (Exception e) {
 					formatAndSendLogs(topic, producer, sdf, i, e);
 				}
 			}
 		}
 		producer.close();
+	}
+
+	private void method1() {
+		int times = 4;
+		method2(times);
+	}
+
+	private void method2(int times) {
+				method3();
+	}
+
+	private void method3() {
+		method4();
+	}
+
+	private void method4() {
+		method5();
+	}
+
+	private void method5() {
+		throw new IllegalArgumentException();
 	}
 
 	private void formatAndSendLogs(String topic, Producer producer, SimpleDateFormat sdf, int i, Exception e) {
